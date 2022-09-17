@@ -1,2 +1,2 @@
 # os161
-something wrong with pull and push, so I create another repo
+My initial default branch is main and I change the default, would this influence later grading?
