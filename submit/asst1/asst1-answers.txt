@@ -38,3 +38,85 @@ asst1-start
 
 -----------------------------------------------------------------
 Step5. Complete the code reading exercise
+
+Question 1: In the book chapters and in class you were introduced to the mechanisms used to 
+transfer control between user processes and the operating system. Tell us where we can find 
+the first line of OS/161 code that is executed when a trap occurs. Then tell us where control
+gets transferred to from that point. What about an interrupt? How does that differ?
+
+
+
+
+Question 2: Making a system call, such as write, ultimately leads to a trap. Find the code 
+in OS/161 that invokes system calls from user programs and causes traps. In which file and on 
+which lines did you find this code?
+
+
+
+
+Question 3: Why do you suppose there are libc functions in the "common" part of the source
+tree (common/libc) as well as in userland/lib/libc?
+
+
+
+
+
+Question 4: Name two things that configure configures. What might invalidate that configuration and 
+make you need/want to rerun it?
+
+
+
+
+
+Question 5: What are some of the details which would make a function "machine dependent"? Why might it be 
+important to maintain this separation, instead of just putting all of the code in one function?
+
+
+
+
+Question 6: How large is a trapframe? Why?
+
+
+
+
+
+Question 7: Under what circumstances should you re-run the kern/conf/config script?
+
+
+
+
+Question 8: Under what circumstances should you run bmake depend in kern/compile/DUMBVM?
+
+
+
+
+Question 9: Under what circumstances should you run bmake or bmake install in kern/compile/DUMBVM?
+
+
+
+
+
+Question 10: When you booted your kernel, you found that there were several commands that you could issue 
+to experiment with it. Explain exactly where and what you would have to do to add a command that printed 
+out, "Hello world!"
+
+
+
+
+
+Question 11: Why do we need to include these in your OS/161 distribution? Why can't you just use the 
+standard utilities that are present on the machine on which you're working?
+
+
+
+
+Question 12: When a user program exits, what is done with the program's return value?
+
+
+
+
+
+
+Question 13: Imagine that you wanted to add a new system call. List all the places that you would 
+need to modify/add code. Then review your answers to questions 7-9 and note which of those actions 
+you need to take in order to test the new system call.
