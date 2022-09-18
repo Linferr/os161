@@ -95,7 +95,7 @@ The seperation is to avoid the possible users-caused problem and protecting the 
 Question 4: Name two things that configure configures. What might invalidate that configuration and 
 make you need/want to rerun it?
 
-
+no idea
 
 
 
