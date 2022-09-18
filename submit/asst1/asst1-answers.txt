@@ -44,18 +44,49 @@ transfer control between user processes and the operating system. Tell us where 
 the first line of OS/161 code that is executed when a trap occurs. Then tell us where control
 gets transferred to from that point. What about an interrupt? How does that differ?
 
-test after change
+A trap is a software-produced interrupt, which I think the first should be handled by 
+either mips_utlb_handler or mips_general_handler. 
+Both of them are in the: os161/src/kern/arch/mips/locore/exception-mips1.S.
+line 68: mips_utlb_handler
+line 86: mips_general_handler
+
+Both of them jump to common_exception (line 104), 
+set up the trap_frame, and than call mips_trap.
+mips_trap() is in os161/src/kern/arch/mips/locore/trap.c, line 125.
+It is a general trap(exception) handling function for mips, which means different type would go to different handler.
+For example, syscall would call the syscall handler and return.
+
+The trap is a special kind of interrupt, which is commonly referred to software intrupt.
+In this case, the first part of trap and interrupt are the same, until get in the mips_trap(), which may .
+The interupt would than go to (line188) mainbus_interrupt() to be handled.
+
+Also, the processor turned interrupts off when it took the trap.
+
+
 
 
 Question 2: Making a system call, such as write, ultimately leads to a trap. Find the code 
 in OS/161 that invokes system calls from user programs and causes traps. In which file and on 
 which lines did you find this code?
 
+os161/src/userland/lib/libc/arch/mips/syscalls-mips.S
+The comment said that all we do is load the syscall number into v0, 
+and kernel would find it and jump to the shared syscall code.
+
+line 49: #define SYSCALL(sym, num), the high level define.
+line 55: jump to __syscall, here jump to the real function.
+line 83: __syscall function, this is the real function invokes system calls from userland.
+
+
 
 
 
 Question 3: Why do you suppose there are libc functions in the "common" part of the source
 tree (common/libc) as well as in userland/lib/libc?
+
+common/libc is something shared by both kernel and user，and mostly standard C library functions;
+while userland/lib/libc is only for users.
+The seperation is to avoid the possible users-caused problem and protecting the system. 
 
 
 
