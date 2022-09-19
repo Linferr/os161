@@ -230,12 +230,134 @@ Add a new entry with a unique number to kern/include/kern/syscall.h.
 Add a case to kern/arch/mips/syscall/syscall.c:syscall() to dispatch
 Add a prototype to kern/include/syscall.h.
 
-rerun kern/conf/config,
-"bmake depend", "bmake", and "bmake install" in kern/compile/DUMBVM
+Then we need to rerun kern/conf/config, in kern/compile/DUMBVM, 
+type "bmake depend" to build dependence,
+type "bmake" to compile,
+type "bmake install" to install your kernel into the root directory that you configured above.
 
 
 
 -----------------------------------Step 7---------------------------------
+
+Question 14: What is the name of the very first function that executes when OS161 starts up? 
+
+    The very first function is "__start" in os161/src/kern/arch/sys161/main/start.S.
+
+
+
+Question 15: What is the very first assembly instruction that executes? 
+
+    line 54 in os161/src/kern/arch/sys161/main/start.S
+    "addiu sp, sp, -24"
+
+
+
+Question 16: Set the breakpoints in the kernel function that shows the menu and in the kernel main function. 
+Now tell GDB to display all the breakpoints that were set and copy the output to your submit file. 
+
+    Num     Type           Disp Enb Address    What
+    1       breakpoint     keep y   0x80014a50 in menu at ../../main/menu.c:711
+    2       breakpoint     keep y   0x800139e4 in kmain at ../../main/main.c:211
+
+
+
+Question 17: Briefly describe what happens between the beginning of the 
+execution and the invocation of the kernel main function. 
+
+    First, the kernel is stopped in start.S, __start() function. 
+    It set up the stact frame, memory map, flush the instruction cache, initialize the TLB, set up registers etc.
+    Then it go to the kernel main function "kmain".
+     
+
+
+
+Question 18: What is the assembly language instruction that calls the kernel main function? 
+
+    In /os161/src/kern/arch/sys161/main/start.S,
+    line 215: jal kmain
+
+
+
+Question 19: Step through the boot() code to find out what functions are called during early initialization. 
+Paste the gdb output that shows you what these functions are.
+
+Breakpoint 7, boot () at ../../main/main.c:99
+99              kprintf("\n");
+(gdb) s
+kprintf (fmt=0x8002fb4c "\n") at ../../lib/kprintf.c:101
+101             dolock = kprintf_lock != NULL
+(gdb) n
+104                     && curcpu->c_spinlocks == 0;
+(gdb) n
+101             dolock = kprintf_lock != NULL
+(gdb) n
+106             if (dolock) {
+(gdb) n
+110                     spinlock_acquire(&kprintf_spinlock);
+(gdb) n
+113             va_start(ap, fmt);
+(gdb) n
+114             chars = __vprintf(console_send, NULL, fmt, ap);
+(gdb) n
+117             if (dolock) {
+(gdb) n
+121                     spinlock_release(&kprintf_spinlock);
+(gdb) n
+124             return chars;
+(gdb) n
+125     }
+
+
+
+
+
+Question 20: Set a breakpoint in thread_bootstrap(). 
+Once you hit that breakpoint, at the very first line of that function, 
+attempt to print the contents of the *bootcpu variable. 
+Copy the output into the submit file. 
+
+Breakpoint 1, thread_bootstrap () at ../../thread/thread.c:357
+357             cpuarray_init(&allcpus);
+(gdb) p *bootcpu
+Cannot access memory at address 0x80000
+
+
+
+
+
+Question 21: Now, step through that function until after the line that says 'bootcpu = cpu_create(0)'. 
+Now print the content of *bootcpu and paste the output. 
+
+(gdb) s
+cpuarray_init (a=0x800358f0 <allcpus>) at ../../thread/thread.c:67
+67      DEFARRAY(cpu, static __UNUSED inline);
+(gdb) n
+thread_bootstrap () at ../../thread/thread.c:367
+367             bootcpu = cpu_create(0);
+(gdb) p *bootcpu
+Cannot access memory at address 0x80000
+
+(gdb) n
+368             bootthread = bootcpu->c_curthread;
+(gdb) p *bootcpu
+$1 = {c_self = 0x8003af00, c_number = 0, c_hardware_number = 0, c_curthread = 0x8003bf80, c_zombies = {tl_head = {tln_prev = 0x0, tln_next = 0x8003af1c, tln_self = 0x0}, tl_tail = {tln_prev = 0x8003af10, tln_next = 0x0, 
+      tln_self = 0x0}, tl_count = 0}, c_hardclocks = 0, c_spinlocks = 0, c_isidle = false, c_runqueue = {tl_head = {tln_prev = 0x0, tln_next = 0x8003af44, tln_self = 0x0}, tl_tail = {tln_prev = 0x8003af38, 
+      tln_next = 0x0, tln_self = 0x0}, tl_count = 0}, c_runqueue_lock = {splk_lock = 0, splk_holder = 0x0}, c_ipi_pending = 0, c_shootdown = {{ts_placeholder = 0} <repeats 16 times>}, c_numshootdown = 0, c_ipi_lock = {
+    splk_lock = 0, splk_holder = 0x0}}
+
+
+
+
+
+
+
+Question 22: Print the allcpus array before the boot() function is executed. Paste the output. 
+
+$1 = {arr = {v = 0x0, num = 0, max = 0}}
+
+
+
+Question 23: Print again the same array after the boot() function is executed. Paste the output.  
 
 
 
