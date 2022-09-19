@@ -47,14 +47,16 @@ gets transferred to from that point. What about an interrupt? How does that diff
 A trap is a software-produced interrupt, which I think the first should be handled by 
 either mips_utlb_handler or mips_general_handler. 
 Both of them are in the: os161/src/kern/arch/mips/locore/exception-mips1.S.
-line 68: mips_utlb_handler
-line 86: mips_general_handler
+line 69: mips_utlb_handler
+line 87: mips_general_handler
 
-Both of them jump to common_exception (line 104), 
+Both of them jump to common_exception (line 104/105), 
 set up the trap_frame, and than call mips_trap.
 mips_trap() is in os161/src/kern/arch/mips/locore/trap.c, line 125.
 It is a general trap(exception) handling function for mips, which means different type would go to different handler.
-For example, syscall would call the syscall handler and return.
+For example: 
+    Syscall? Call the syscall handler and return.
+    in kern/arch/mips/syscall/syscall.c., which is a System call dispatcher.
 
 The trap is a special kind of interrupt, which is commonly referred to software intrupt.
 In this case, the first part of trap and interrupt are the same, until get in the mips_trap(), which may .
@@ -69,13 +71,13 @@ Question 2: Making a system call, such as write, ultimately leads to a trap. Fin
 in OS/161 that invokes system calls from user programs and causes traps. In which file and on 
 which lines did you find this code?
 
-os161/src/userland/lib/libc/arch/mips/syscalls-mips.S
+os161/src/userland/lib/libc/arch/mips/syscalls-mips.S, line 84
 The comment said that all we do is load the syscall number into v0, 
 and kernel would find it and jump to the shared syscall code.
 
 line 49: #define SYSCALL(sym, num), the high level define.
 line 55: jump to __syscall, here jump to the real function.
-line 83: __syscall function, this is the real function invokes system calls from userland.
+line 84: __syscall function, this is the real function invokes system calls from userland.
 
 
 
@@ -86,8 +88,8 @@ tree (common/libc) as well as in userland/lib/libc?
 
 common/libc is something shared by both kernel and user，and mostly standard C library functions;
 while userland/lib/libc is only for users.
-The seperation is to avoid the possible users-caused problem and protecting the system. 
-
+This would also protect the kernel libc away form the possible changes of users when they would like to do some 
+changes to their userland libc.
 
 
 
@@ -95,17 +97,43 @@ The seperation is to avoid the possible users-caused problem and protecting the 
 Question 4: Name two things that configure configures. What might invalidate that configuration and 
 make you need/want to rerun it?
 
-no idea
+configure configures:
+Target hardware platform and machine type.
+Default optimize/debug flag.
+Default location of the root of the installed system.
+
+We need/want to rerun it when we change the hardware platform, or change the location 
+of the root of installed system. For example, when we use a different computer with a different OS.
+
 
 
 
 Question 5: What are some of the details which would make a function "machine dependent"? Why might it be 
 important to maintain this separation, instead of just putting all of the code in one function?
 
+Machine-dependent means the function is based on hardware.
+Function written in assembly is machine-dependment as different machine would have different register,
+which means some of the code would meed some specific registers or hardware functionality. These stuff only 
+relate to the hardware/machine. For example, 32-bit MIPS processors is different from x86-64.
+
+Maintaining this separation would be helpful in below lists:
+First, it would be helpful to organize our different file or code on the same machine. Most of the time we don't need to change
+those machine-dependent code as they are almost the same.
+Also, when we want ot change to another computer/machine, it is easy for us to traget the code to change(machine-dependent) and 
+optimize them to our new machine. 
 
 
 
 Question 6: How large is a trapframe? Why?
+
+os161/src/kern/arch/mips/include/trapframe.h
+In the struct trapfame, there are (77-41+1=37) registers.
+Each register is under type of uint32_t, which is 32 bits, 4 byte each.
+In this case, 37*4 = 148 bytes.
+
+It is defined to be 37 registers.
+Structure describing what is saved on the stack during entry to the exception handler.
+Each register would save different information, e.g. vaddr, status. vause, etc.
 
 
 
@@ -113,16 +141,30 @@ Question 6: How large is a trapframe? Why?
 
 Question 7: Under what circumstances should you re-run the kern/conf/config script?
 
+If we change the source file, or change the kernel config, or enable/disable an option,
+or enable/disable a device, or get additional directives from another file.
+
 
 
 
 Question 8: Under what circumstances should you run bmake depend in kern/compile/DUMBVM?
+
+If you change #include directives or header to change the dependence.
+Or you just finished the congiguration of DUMBVM.
+
+"bmake depend" scans all of the source files that you have configured to 
+be part of your kernel and ensures that all their header files are also included.
 
 
 
 
 Question 9: Under what circumstances should you run bmake or bmake install in kern/compile/DUMBVM?
 
+If you change the kernel code or change the dependence, 
+after you run the "bmake depend" to build the dependance,
+and than you should run "bmake" to to compile or recompile the kernel in its source directory. 
+This generates your kernel binary.
+And than use "bmake install" to install your kernel into the root directory that you configured above.
 
 
 
@@ -131,6 +173,28 @@ Question 10: When you booted your kernel, you found that there were several comm
 to experiment with it. Explain exactly where and what you would have to do to add a command that printed 
 out, "Hello world!"
 
+At line 406, add function like this:
+static
+int
+cmd_hello(int nargs, char **args)
+{   (void)nargs;
+	(void)args;
+	kprintf("Hello world!\n");
+	return 0;
+}
+
+At line 457, under *opsmenu[], add:
+ "[hello]   Print 'Hello world!'      ",
+
+At line 565, under cmd_opsmenu, add:
+ {"hello", cmd_hello };
+
+Then remember to goi back to os161/src/kern/compile/DUMBVM, and "bmake" to compile, and "bmake install".
+After all these, we can boot the kernel and go to "menu", "operations menu" and type "hello", it would print "Hello world!".
+
+
+
+
 
 
 
@@ -138,12 +202,22 @@ out, "Hello world!"
 Question 11: Why do we need to include these in your OS/161 distribution? Why can't you just use the 
 standard utilities that are present on the machine on which you're working?
 
+There are so many machine-dependent functions which cannot work well on our machine.
+That is to say, the standard utilities work well on OS/161 or 32 bits-MIPS, may not work on our x86-64.
+
+
 
 
 
 Question 12: When a user program exits, what is done with the program's return value?
 
+os161/src/userland/lib/crt0/mips/crt0.S
+In this file, the comment said that, all we really do is save copies of argv and environ 
+for use by libc funcions (e.g. err* and warn*), and call exit when main returns
 
+The code said that, return value of main would be in v0 register, 
+and than be moved to s0(which is callee-save) so we still have it in case exit() returns.
+Also move it to a0 register a sthe argument of exit().
 
 
 
@@ -151,3 +225,22 @@ Question 12: When a user program exits, what is done with the program's return v
 Question 13: Imagine that you wanted to add a new system call. List all the places that you would 
 need to modify/add code. Then review your answers to questions 7-9 and note which of those actions 
 you need to take in order to test the new system call.
+
+Add a new entry with a unique number to kern/include/kern/syscall.h.
+Add a case to kern/arch/mips/syscall/syscall.c:syscall() to dispatch
+Add a prototype to kern/include/syscall.h.
+
+rerun kern/conf/config,
+"bmake depend", "bmake", and "bmake install" in kern/compile/DUMBVM
+
+
+
+-----------------------------------Step 7---------------------------------
+
+
+
+
+
+
+
+
