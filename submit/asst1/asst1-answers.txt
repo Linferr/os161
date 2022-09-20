@@ -226,14 +226,14 @@ Question 13: Imagine that you wanted to add a new system call. List all the plac
 need to modify/add code. Then review your answers to questions 7-9 and note which of those actions 
 you need to take in order to test the new system call.
 
-Add a new entry with a unique number to kern/include/kern/syscall.h.
-Add a case to kern/arch/mips/syscall/syscall.c:syscall() to dispatch
-Add a prototype to kern/include/syscall.h.
+In kern/arch/mips/syscall/syscall.c:syscall(), create a new case under line 112 which is used for exception.
+In kern/include/syscall.h, create a new prototype under line 61.
+In kern/include/kern/syscall.h, define a new syscall number.
 
-Then we need to rerun kern/conf/config, in kern/compile/DUMBVM, 
-type "bmake depend" to build dependence,
-type "bmake" to compile,
-type "bmake install" to install your kernel into the root directory that you configured above.
+Then we need to rerun kern/conf/config, in kern/compile/DUMBVM:
+Type "bmake depend" to build dependence,
+Type "bmake" to compile,
+Type "bmake install" to install your kernel into the root directory that you configured above.
 
 
 
