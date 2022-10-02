@@ -402,6 +402,17 @@ cmd_kheapdump(int nargs, char **args)
 	return 0;
 }
 
+/* cmd function to print hello world */
+static
+int
+cmd_hello(int nargs, char **args)
+{	
+	(void)nargs;
+	(void)args;
+	kprintf("Hello world!\n");
+	return 0;
+}
+
 ////////////////////////////////////////
 //
 // Menus.
@@ -443,6 +454,7 @@ static const char *opsmenu[] = {
 	"[sync]    Sync filesystems          ",
 	"[panic]   Intentional panic         ",
 	"[q]       Quit and shut down        ",
+	"[hello]   Print 'Hello world!'      ",
 	NULL
 };
 
@@ -549,6 +561,8 @@ static struct {
 	{ "q",		cmd_quit },
 	{ "exit",	cmd_quit },
 	{ "halt",	cmd_quit },
+	/* add hello world */
+	{"hello", cmd_hello },
 
 	/* stats */
 	{ "kh",         cmd_kheapstats },
