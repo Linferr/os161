@@ -57,13 +57,12 @@ Why is it important to turn off interrupts in the thread subsystem code?
 How does a sleeping thread get to run again?
 
     A thread can wake up another thread by: 
-    thread_make_runnable(), lock the run queue of the target thread's cpu,
-    put the thread in the run queue, and unlock the run queue.
-    A sleeping thread:
-    wchan_wakeone() grabs a thread form the channel, if the thread is the first in the channel, it can be wake up;
+    wchan_wakeone() call threadlist_remhead() and grabs the first a thread form the channel, and then it can be wake up;
     wchan_wakeall() grabs all the thread form the channel.
     And than both of them would call thread_make_runnable() and do the same above.
 
+    thread_make_runnable(), lock the run queue of the target thread's cpu,
+    put the thread in the run queue, and unlock the run queue.
 
 
 
