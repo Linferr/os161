@@ -69,16 +69,15 @@ How does a sleeping thread get to run again?
 
 6. What function(s) choose(s) the next thread to run?
 
-    schedule() is called periodically from hardclock(). It should reshuffle the current CPU's run queue by job priority.
-    thread_make_runnable() chooses the next first thread in the runqueue to run.
-
+    thread_switch(), line 642 get the next thread from threadlist_remhead().
     
+
 
 7. How does it (do they) pick the next thread?
 
-    schedule() is called periodically from hardclock(). It should reshuffle the current CPU's run queue by job priority.
-    threadlist_addtail() put the next thread to the runqueue in the order of FIFO 
-    thread_make_runnable() chooses the next first thread in the runqueue to run.
+    First, threadlist_addtail() add the threads to the queue,
+    then, thread_switch() call threadlist_remhead() to get the next thread.
+
 
 
 

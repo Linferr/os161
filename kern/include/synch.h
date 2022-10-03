@@ -75,6 +75,11 @@ void V(struct semaphore *);
 struct lock {
         char *lk_name;
         // add what you need here
+        struct wchan *lk_wc;
+        volatile bool lk_avail;   // check for this lock is available
+        struct spinlock lk_spin;      // spinlock to make it atomic wait channel operations
+
+        struct thread *lk_thread;       // show who hold the lock
         // (don't forget to mark things volatile as needed)
 };
 
@@ -113,7 +118,8 @@ bool lock_do_i_hold(struct lock *);
 
 struct cv {
         char *cv_name;
-        // add what you need here
+        struct spinlock cv_spin;
+        struct wchan *cv_wc;
         // (don't forget to mark things volatile as needed)
 };
 
