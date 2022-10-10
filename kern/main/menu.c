@@ -41,6 +41,7 @@
 #include <sfs.h>
 #include <syscall.h>
 #include <test.h>
+#include "opt-synchprobs.h"
 #include "opt-sfs.h"
 #include "opt-net.h"
 
@@ -114,6 +115,11 @@ common_prog(int nargs, char **args)
 {
 	struct proc *proc;
 	int result;
+
+#if OPT_SYNCHPROBS
+	kprintf("Warning: this probably won't work with a "
+		"synchronization-problems kernel.\n");
+#endif
 
 	/* Create a process for the new program to run in. */
 	proc = proc_create_runprogram(args[0] /* name */);
@@ -402,17 +408,6 @@ cmd_kheapdump(int nargs, char **args)
 	return 0;
 }
 
-/* cmd function to print hello world */
-static
-int
-cmd_hello(int nargs, char **args)
-{	
-	(void)nargs;
-	(void)args;
-	kprintf("Hello world!\n");
-	return 0;
-}
-
 ////////////////////////////////////////
 //
 // Menus.
@@ -454,7 +449,6 @@ static const char *opsmenu[] = {
 	"[sync]    Sync filesystems          ",
 	"[panic]   Intentional panic         ",
 	"[q]       Quit and shut down        ",
-	"[hello]   Print 'Hello world!'      ",
 	NULL
 };
 
@@ -514,6 +508,9 @@ cmd_testmenu(int n, char **a)
 static const char *mainmenu[] = {
 	"[?o] Operations menu                ",
 	"[?t] Tests menu                     ",
+#if OPT_SYNCHPROBS
+	"[sp1] Air Balloon                   ",
+#endif
 	"[kh] Kernel heap stats              ",
 	"[khgen] Next kernel heap generation ",
 	"[khdump] Dump kernel heap           ",
@@ -561,8 +558,11 @@ static struct {
 	{ "q",		cmd_quit },
 	{ "exit",	cmd_quit },
 	{ "halt",	cmd_quit },
-	/* add hello world */
-	{"hello", cmd_hello },
+
+#if OPT_SYNCHPROBS
+	/* in-kernel synchronization problem(s) */
+	{ "sp1",	airballoon },
+#endif
 
 	/* stats */
 	{ "kh",         cmd_kheapstats },
