@@ -335,20 +335,21 @@ airballoon(int nargs, char **args)
 	if(err)
 		goto panic;
 	
-	// check before go to done
-	// semephore used when each thread is done and it use V(), 
-	// which means it would be at least (3+8=11) threads
-	// I need to used P() to decrement the counter.
-	for (int i = 0; i < 11; i++) {
-		P(done);
-	}
 	goto done;
 
 panic:
 	panic("airballoon: thread_fork failed: %s)\n",
 	      strerror(err));
 
-done:
+done:	
+	// check before go to clean the memory
+	// semephore used when each thread is done and it use V(), 
+	// which means it would be at least (3+8=11) threads
+	// I need to used P() to decrement the counter.
+	for (int i = 0; i < 11; i++) {
+		P(done);
+	}
+
 	//free all the memory used, locks, cv
 	lock_destroy(ropes_left_lk);
 	lock_destroy(cv_lock);
@@ -367,5 +368,6 @@ done:
 	kprintf("Main thread done\n");
 	return 0;
 }
+
 
 
