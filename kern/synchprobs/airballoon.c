@@ -249,11 +249,6 @@ done3:
 
 }
 
-
-/*
-	balloon is a thread keeps sleeping until all ropes are cut;
-	here need a new cv;
-*/
 static
 void
 balloon(void *p, unsigned long arg)
@@ -264,9 +259,11 @@ balloon(void *p, unsigned long arg)
 	kprintf("Balloon thread starting\n");
 
 	/* Implement this function */
-	//if any rope is not cut, balloon should sleep in wait channel
+	//if any rope is not cut, balloon should sleep in wait channel;
+	// balloon is a thread keeps sleeping until all ropes are cut;
+	// here need a new cv; and a related lock
 	lock_acquire(cv_lock);
-	while (ropes_left > 0) {
+	while (ropes_left >= 1) {
 		cv_wait(balloon_cv, cv_lock);
 	}
 	lock_release(cv_lock);
