@@ -12,7 +12,9 @@
 #define NROPES 16
 static int ropes_left = NROPES;
 
-/* Data structures for rope mappings */
+/*  Data structures for rope mappings 
+	The data structure I use an other file <airballoon.h>
+*/
 static struct rope *ropes[NROPES];
 static struct hook *hooks[NROPES];
 static struct stake *stakes[NROPES];
@@ -27,6 +29,8 @@ static struct lock *cv_lock; // lock for cv
  * that must be maintained. Explain the exit conditions. How
  * do all threads know when they are done?
 	
+	The data structure I use an other file <airballoon.h>
+
 	what I want to implement is: 
 	using an array rope to track each rope's state;
 	array hook and stake to track which rope to change;
